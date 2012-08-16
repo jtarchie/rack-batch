@@ -20,11 +20,37 @@ Or install it yourself as:
 
 In a Rack `config.ru` file somewhere:
 
-    use Rack::Batch
+```ruby
+use Rack::Batch, {endpoint: '/secret_batch', limit: 10}
 
-    run MyRackApp
+run MyRackApp
+```
 
-Now when a user hits `/batch` endpoint then can make a request with multiple requests.
+Now when a user GETs `/secret_batch` endpoint then can make a request with multiple requests (no more than 10). All requests are passed through the `ops` param.
+
+An example request would look like:
+```ruby
+{
+  ops: [
+    {
+      method: "get",
+      url: "/ping"
+    },
+    {
+      method: "get",
+      url: "/ping"
+    },
+    {
+      method: "get",
+      url: "/ping"
+    },
+    {
+      method: "get",
+      url: "/ping"
+    }
+  ]
+}
+```
 
 ## Contributing
 
