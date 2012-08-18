@@ -7,6 +7,7 @@ module Rack
       @endpoint = "/#{options[:endpoint] || "batch"}".gsub(/^\/\//,'/')
       @limit = options[:limit] || 0
       @include_time = options[:include_time]
+      @double_encode_json = options[:encode_json] == false
       @app = app
     end
 
@@ -16,16 +17,20 @@ module Rack
       current_request = Rack::Request.new(env)
       internal_requests = (current_request.params["ops"] || [])[0..@limit-1]
 
-      requests = internal_requests.map do |op|
+      internal_requests = internal_requests.map do |op|
         status, headers, body = @app.call(new_env_from_op(env, op))
-        {
+        internal_response = {
             status: status,
             headers: headers,
             body: body.join
         }
+        if @double_encode_json && headers['Content-Type'].include?("application/json")
+          internal_response[:body] = JSON.parse(internal_response[:body])
+        end
+        internal_response
       end
 
-      [ 200, {}, JSON.generate(requests) ]
+      [ 200, {}, JSON.generate(internal_requests) ]
     end
 
     private

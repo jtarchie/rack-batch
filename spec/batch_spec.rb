@@ -32,7 +32,7 @@ describe "adding Rack::Batch as a middleware" do
     end
 
     it "returns the default headers" do
-      response.headers.should include({"Content-Type"=>"text/html;charset=utf-8", "Content-Length"=>"4"})
+      response.headers.should include({"Content-Type"=>"plain/text", "Content-Length"=>"4"})
     end
   end
 
@@ -69,7 +69,7 @@ describe "adding Rack::Batch as a middleware" do
         end
 
         it "returns the default headers" do
-          response.headers.should include({"Content-Type"=>"text/html;charset=utf-8", "Content-Length"=>"#{"pong #{name}".length}"})
+          response.headers.should include({"Content-Type"=>"plain/text", "Content-Length"=>"#{"pong #{name}".length}"})
         end
       end
     end
@@ -85,7 +85,7 @@ describe "adding Rack::Batch as a middleware" do
     end
 
     it "returns the default headers" do
-      response.headers.should include({"Content-Type"=>"text/html;charset=utf-8", "Content-Length"=>"23"})
+      response.headers.should include({"Content-Type"=>"application/json;charset=utf-8", "Content-Length"=>"23"})
     end
   end
 
@@ -114,7 +114,7 @@ describe "adding Rack::Batch as a middleware" do
         end
 
         it "returns the default headers" do
-          response.headers.should include({"Content-Type"=>"text/html;charset=utf-8", "Content-Length"=>"34"})
+          response.headers.should include({"Content-Type"=>"application/json;charset=utf-8", "Content-Length"=>"34"})
         end
       end
 
@@ -176,7 +176,21 @@ describe "adding Rack::Batch as a middleware" do
     end
 
     context "don't double encode JSON body" do
-      pending
+      let(:response) { OpenStruct.new(batch_response) }
+      def app
+        Class.new(Application) do
+          use Rack::Batch, encode_json: false
+        end
+      end
+
+      context "when response body is JSON" do
+        it "doesn't encode JSON into JSON string" do
+          get '/batch', {ops: [method: "post", url:"/headers"]}
+
+          response.body['headers']['REQUEST_METHOD'].should == "POST"
+          response.body['headers']['PATH_INFO'].should == "/headers"
+        end
+      end
     end
 
     context "with max limit of batch requests" do
