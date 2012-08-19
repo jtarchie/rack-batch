@@ -6,7 +6,7 @@ This gem allows multiple requests to be batch into a single request. This can be
 
 Add this line to your application's Gemfile:
 
-    gem 'rack-batch'
+    gem 'rack-batch', require: "rack/batch"
 
 And then execute:
 
@@ -15,6 +15,10 @@ And then execute:
 Or install it yourself as:
 
     $ gem install rack-batch
+
+    ...
+
+    require "rack/batch"
 
 ## Usage
 
@@ -28,29 +32,17 @@ run MyRackApp
 
 Now when a user GETs `/secret_batch` endpoint then can make a request with multiple requests (no more than 10). All requests are passed through the `ops` param.
 
-An example request would look like:
-```ruby
-{
-  ops: [
-    {
-      method: "get",
-      url: "/ping"
-    },
-    {
-      method: "get",
-      url: "/ping"
-    },
-    {
-      method: "get",
-      url: "/ping"
-    },
-    {
-      method: "get",
-      url: "/ping"
-    }
-  ]
-}
-```
+## Example
+
+Please look at the `examples/` folder for usage.
+
+## Options
+
+`Rack::Batch` can take several options as a hash argument.
+
+* *endpoint*
+* *limit*
+* *encode_json*
 
 ## Contributing
 
