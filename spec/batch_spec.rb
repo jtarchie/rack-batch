@@ -22,6 +22,10 @@ describe "adding Rack::Batch as a middleware" do
     JSON.parse(response.body)
   end
 
+  def batch_request(ops)
+    post '/batch', {}, { 'rack.input' => StringIO.new({ops: ops}.to_json) }
+  end
+
   shared_examples_for "GET default request" do
     it "returns the status OK" do
       response.status.should == 200
@@ -49,7 +53,7 @@ describe "adding Rack::Batch as a middleware" do
       let(:response) { OpenStruct.new batch_response }
 
       context "a basic request" do
-        before { get "/batch", ops: [{method: "get", url: "/ping"}] }
+        before { batch_request [{method: "get", url: "/ping"}] }
 
         it_behaves_like("GET default request")
       end
@@ -58,7 +62,7 @@ describe "adding Rack::Batch as a middleware" do
         let(:status) { 511 }
         let(:name) { "JT" }
 
-        before { get "/batch", ops: [{method: "get", url: "/ping?status=#{status}", params: {name: name}}] }
+        before { batch_request [{method: "get", url: "/ping?status=#{status}", params: {name: name}}] }
 
         it "returns the status OK" do
           response.status.should == status
@@ -103,7 +107,7 @@ describe "adding Rack::Batch as a middleware" do
         let(:response) { OpenStruct.new batch_response }
         let(:body) { "Hello World" }
 
-        before { get "/batch", {ops: [{method: "post", url: "/body", body: body}] } }
+        before { batch_request [{method: "post", url: "/body", body: body}] }
 
         it "returns the status 201" do
           response.status.should == 201
@@ -127,7 +131,7 @@ describe "adding Rack::Batch as a middleware" do
           }
         end
 
-        before { get "/batch", {ops: [{method: "post", url: "/headers", headers: headers } ] } }
+        before { batch_request [{method: "post", url: "/headers", headers: headers } ] }
 
         it "returns the status 201" do
           response.status.should == 201
@@ -147,7 +151,7 @@ describe "adding Rack::Batch as a middleware" do
   context "handling multiple requests" do
     context "for GET request" do
       before do
-        get '/batch', {ops: [{method: "get", url: "/ping"}] * 5}
+        batch_request [{method: "get", url: "/ping"}] * 5
       end
 
       it "returns the correct amount of responses" do
@@ -165,12 +169,12 @@ describe "adding Rack::Batch as a middleware" do
       end
 
       it "cannot get anything from the default endpoint" do
-        get '/batch'
+        post '/batch'
         last_response.status.should == 404
       end
 
       it "only loads from the specified batch end point" do
-        get '/other_batch_point'
+        post '/other_batch_point'
         last_response.status.should == 200
       end
     end
@@ -185,7 +189,7 @@ describe "adding Rack::Batch as a middleware" do
 
       context "when response body is JSON" do
         it "doesn't encode JSON into JSON string" do
-          get '/batch', {ops: [method: "post", url:"/headers"]}
+          batch_request [{method: "post", url:"/headers"}]
 
           response.body['headers']['REQUEST_METHOD'].should == "POST"
           response.body['headers']['PATH_INFO'].should == "/headers"
@@ -201,7 +205,7 @@ describe "adding Rack::Batch as a middleware" do
       end
 
       it "returns no more than limit requests" do
-        get '/batch', {ops: [{method: "get", url: "/ping"}] * 5}
+        batch_request [{method: "get", url: "/ping"}] * 5
         batch_responses.length.should == 3
       end
     end
