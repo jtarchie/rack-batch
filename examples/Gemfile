@@ -1,0 +1,7 @@
+source :rubygems
+
+gem "rack-batch", path: "../"
+gem "rest-client"
+gem "sinatra"
+gem "thin"
+gem "awesome_print", require: "ap"
