@@ -30,7 +30,7 @@ use Rack::Batch, {endpoint: '/secret_batch', limit: 10}
 run MyRackApp
 ```
 
-Now when a user GETs `/secret_batch` endpoint then can make a request with multiple requests (no more than 10). All requests are passed through the `ops` param.
+Now when a user POSTs `/secret_batch` endpoint then can make a request with multiple requests (no more than 10). All requests are passed through the `ops` param.
 
 ## Example
 
