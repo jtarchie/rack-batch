@@ -1,3 +1,7 @@
+# Deprecated
+
+For better example, please use [batch_api](https://github.com/arsduo/batch_api)
+
 # Rack::Batch
 
 This gem allows multiple requests to be batch into a single request. This can be handy when doing API calls from mobile devices with a slow connection.
